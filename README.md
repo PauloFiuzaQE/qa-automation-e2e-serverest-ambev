@@ -1,4 +1,6 @@
+![Cypress CI](https://github.com/PauloFiuzaQE/qa-automation-e2e-serverest-ambev/actions/workflows/main.yml/badge.svg)
 # 🚀 QA Automation E2E - ServeRest Ambev
+
 
 [![Cypress](https://img.shields.io/badge/Cypress-13.x-17202C?style=flat-square&logo=cypress)](https://www.cypress.io/)
 [![K6 Performance](https://img.shields.io/badge/Performance-k6-7D64FF?style=flat-square&logo=k6)](https://k6.io/)
