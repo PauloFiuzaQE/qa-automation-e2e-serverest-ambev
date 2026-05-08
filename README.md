@@ -80,4 +80,21 @@ O projeto conta com um arquivo `azure-pipelines.yml` pronto para integração. O
 3. O deploy só é liberado se 100% da suíte passar.
 
 ---
+## 📈 KPIs & Health Check (Cypress Cloud)
+
+Para garantir a confiabilidade e o monitoramento da saúde dos testes, este projeto está integrado ao **Cypress Cloud**.
+
+* **Total de Cenários:** 19 validados
+* **Arquivos de Spec:** 7 specs (API e Frontend)
+* **Taxa de Sucesso:** 100% (Zero falhas)
+* **Ambiente de CI:** Linux Ubuntu (via GitHub Actions)
+
+---
+
+### 🔗 Dashboard Dinâmico
+[👉 Acessar Execução em Tempo Real no Cypress Cloud](https://cloud.cypress.io/projects/vya8be/runs/1)
+
+### 📸 Evidência Estática (Health Check)
+![Cypress Cloud Report](assets/cypress-cloud.png)
+
 *Desenvolvido por **Paulo Fiuza** - Analista de Qualidade Sênior*
