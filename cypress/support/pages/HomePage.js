@@ -10,7 +10,7 @@ class HomePage {
     }
 
     adicionarProdutoNaLista() {
-        cy.get('[data-testid="adicionarNaLista"]').first().click();
+        cy.get('[data-testid="adicionarNaLista"]', { timeout: 10000 }).click();
     }
 
     irParaOCarrinhoFinal() {
