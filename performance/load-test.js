@@ -3,9 +3,9 @@ import { check, sleep } from 'k6';
 
 export const options = {
     stages: [
-        { duration: '10s', target: 20 }, // Rampa de subida: 20 usuários em 10s
-        { duration: '20s', target: 20 }, // Carga constante: Mantém 20 usuários por 20s
-        { duration: '10s', target: 0 },  // Rampa de descida: Zera os usuários em 10s
+        { duration: '10s', target: 20 },
+        { duration: '20s', target: 20 },
+        { duration: '10s', target: 0 },
     ],
     thresholds: {
 

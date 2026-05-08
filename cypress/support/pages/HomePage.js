@@ -13,7 +13,6 @@ class HomePage {
         cy.get('[data-testid="adicionarNaLista"]').first().click();
     }
 
-    // O método que o Cypress não estava achando:
     irParaOCarrinhoFinal() {
         cy.contains('Adicionar no carrinho').click();
     }

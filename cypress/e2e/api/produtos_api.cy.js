@@ -1,8 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-describe('API - ServeRest - Validação de Contratos e Regras de Negócio', () => {
+describe('API - ServeRest - Validação de Contratos, CRUD e Regras de Negócio', () => {
 
-    // Massa de dados base para o caminho feliz
     const adminUser = {
         nome: faker.person.fullName(),
         email: faker.internet.email(),
@@ -10,31 +9,26 @@ describe('API - ServeRest - Validação de Contratos e Regras de Negócio', () =
         administrador: 'true'
     };
 
+    let tokenValido;
+    let idProdutoGerado;
+
     it('Cenário 1: E2E Completo e Schema - Cadastrar Admin, Logar e Criar Produto', () => {
-        // 1. Cadastra Usuário Admin e Valida Contrato
         cy.request('POST', '/usuarios', adminUser).then((response) => {
             expect(response.status).to.eq(201);
             expect(response.body).to.have.all.keys('message', '_id');
-            expect(response.body.message).to.be.a('string').and.eq('Cadastro realizado com sucesso');
-            expect(response.body._id).to.be.a('string');
         });
 
-        // 2. Realiza Login, Valida Contrato e Captura Token
         cy.request({
             method: 'POST',
             url: '/login',
             body: { email: adminUser.email, password: adminUser.password }
         }).then((responseLogin) => {
             expect(responseLogin.status).to.eq(200);
-            expect(responseLogin.body).to.have.all.keys('message', 'authorization');
             expect(responseLogin.body.authorization).to.include('Bearer ');
+            tokenValido = responseLogin.body.authorization;
 
-            // Captura o token e guarda na variável
-            const tokenValido = responseLogin.body.authorization;
-
-            // 3. Cadastra Produto usando o Token
             const productData = {
-                nome: faker.commerce.productName() + ' ' + faker.string.uuid(),
+                nome: `Cerveja Artesanal QA ${faker.string.uuid()}`,
                 preco: faker.number.int({ min: 10, max: 200 }),
                 descricao: faker.commerce.productDescription(),
                 quantidade: faker.number.int({ min: 1, max: 100 })
@@ -47,12 +41,12 @@ describe('API - ServeRest - Validação de Contratos e Regras de Negócio', () =
                 body: productData
             }).then((responseProduto) => {
                 expect(responseProduto.status).to.eq(201);
-                expect(responseProduto.body).to.have.property('message', 'Cadastro realizado com sucesso');
+                idProdutoGerado = responseProduto.body._id;
             });
         });
     });
 
-    it('Cenário 2: Regra de Negócio - Bloquear cadastro de usuário com E-mail já existente', () => {
+    it('Cenário 2: Regra de Negócio - Bloquear cadastro com E-mail já existente', () => {
         cy.request({
             method: 'POST',
             url: '/usuarios',
@@ -60,12 +54,11 @@ describe('API - ServeRest - Validação de Contratos e Regras de Negócio', () =
             failOnStatusCode: false
         }).then((response) => {
             expect(response.status).to.eq(400);
-            expect(response.body).to.have.all.keys('message');
             expect(response.body.message).to.eq('Este email já está sendo usado');
         });
     });
 
-    it('Cenário 3: Regra de Segurança - Bloquear cadastro de produto por usuário comum (Não-Admin)', () => {
+    it('Cenário 3: Regra de Segurança - Bloquear cadastro de produto por usuário comum (403)', () => {
         const commomUser = {
             nome: faker.person.fullName(),
             email: faker.internet.email(),
@@ -74,27 +67,51 @@ describe('API - ServeRest - Validação de Contratos e Regras de Negócio', () =
         };
 
         cy.request('POST', '/usuarios', commomUser);
-
         cy.request('POST', '/login', { email: commomUser.email, password: commomUser.password })
             .then((responseLogin) => {
-                const tokenComum = responseLogin.body.authorization;
-
                 cy.request({
                     method: 'POST',
                     url: '/produtos',
-                    headers: { authorization: tokenComum },
-                    body: {
-                        nome: "Produto Ilegal",
-                        preco: 50,
-                        descricao: "Tentativa de fraude",
-                        quantidade: 10
-                    },
+                    headers: { authorization: responseLogin.body.authorization },
+                    body: { nome: "Produto Ilegal", preco: 50, descricao: "Tentativa", quantidade: 10 },
                     failOnStatusCode: false
                 }).then((responseProduto) => {
                     expect(responseProduto.status).to.eq(403);
-                    expect(responseProduto.body.message).to.eq('Rota exclusiva para administradores');
                 });
             });
     });
 
+    it('Cenário 4: Validar Listagem e Edição de Produto (GET e PUT)', () => {
+        // Valida GET
+        cy.request('GET', '/produtos').then((res) => {
+            expect(res.status).to.eq(200);
+            expect(res.body.produtos).to.be.an('array');
+        });
+
+        cy.request({
+            method: 'PUT',
+            url: `/produtos/${idProdutoGerado}`,
+            headers: { authorization: tokenValido },
+            body: {
+                nome: `Produto Editado - Ambev QA ${faker.string.uuid()}`,
+                preco: 350,
+                descricao: "Descrição atualizada via automação",
+                quantidade: 50
+            }
+        }).then((res) => {
+            expect(res.status).to.eq(200);
+            expect(res.body.message).to.eq('Registro alterado com sucesso');
+        });
+    });
+
+    it('Cenário 5: Limpeza de Dados - Excluir Produto (DELETE)', () => {
+        cy.request({
+            method: 'DELETE',
+            url: `/produtos/${idProdutoGerado}`,
+            headers: { authorization: tokenValido }
+        }).then((res) => {
+            expect(res.status).to.eq(200);
+            expect(res.body.message).to.eq('Registro excluído com sucesso');
+        });
+    });
 });

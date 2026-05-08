@@ -2,7 +2,6 @@ class CadastroPage {
     visitar() {
 
         cy.visit(`${Cypress.env('frontUrl')}/login`);
-        // Navega para o cadastro simulando o clique do usuário real
         cy.get('[data-testid="cadastrar"]').click();
     }
 

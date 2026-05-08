@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 
-// --- COMANDO 1: Prepara o Banco de Dados via API ---
 Cypress.Commands.add('criarClienteApi', () => {
     const cliente = {
         nome: faker.person.fullName(),
